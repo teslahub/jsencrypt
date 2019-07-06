@@ -33,7 +33,6 @@ var plugins = [
 module.exports = {
         input: "./src/index.js",
         plugins: plugins,
-        name: "JSEncrypt",
         output: {
             file: pkg.main,
             format: 'umd',

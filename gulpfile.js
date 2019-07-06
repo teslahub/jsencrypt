@@ -39,7 +39,7 @@ gulp.task('license', function() {
       return 'File: ' + file.path.replace(__dirname, '') + "\n" + contents;
     }))
     .pipe(concat('LICENSE.txt'))
-    .pipe(gulp.dest(''));
+    .pipe(gulp.dest('dist'));
 });
 
 /**
@@ -74,14 +74,14 @@ gulp.task('tsc', function() {
 /**
  * build library with rollup
  */
-gulp.task('assemble', ['tsc'], function () {
+gulp.task('assemble', gulp.series('tsc', function () {
     var config = require('./rollup.config');
 
     return rollup.rollup(config).then(function (bundle) {
         return bundle.write(config.output);
 
     });
-});
+}));
 
 /**
  * copy mocha files from node modules to test directory (for gh-pages serving)
@@ -94,11 +94,11 @@ gulp.task('prepare_test', function() {
 });
 
 gulp.task('compress', function (cb) {
-  return gulp.src('bin/jsencrypt.js')
+  return gulp.src('dist/jsencrypt.js')
     .pipe(uglify())
     .pipe(rename('jsencrypt.min.js'))
-    .pipe(gulp.dest('bin'));
+    .pipe(gulp.dest('dist'));
 });
 
-gulp.task('build', ['prepare_test', 'lint', 'assemble', 'license', 'compress']);
-gulp.task('default', ['build']);
+gulp.task('build', gulp.series('prepare_test', 'lint', 'assemble', 'license', 'compress'));
+gulp.task('default', gulp.series('build'));
