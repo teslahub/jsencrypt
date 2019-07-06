@@ -4887,7 +4887,7 @@ YAHOO.lang.extend(KJUR.asn1.DERTaggedObject, KJUR.asn1.ASN1Object);
 /**
  * Create a new JSEncryptRSAKey that extends Tom Wu's RSA key object.
  * This object is just a decorator for parsing the key parameter
- * @param {string|Object} key - The key in string format, or an object containing
+ * @param {string|object} key - The key in string format, or an object containing
  * the parameters needed to build a RSAKey object.
  * @constructor
  */
@@ -5208,6 +5208,27 @@ var JSEncrypt = /** @class */ (function () {
         }
         this.key = new JSEncryptRSAKey(key);
     };
+    JSEncrypt.prototype.setKeyParameters = function (key) {
+        if (this.log && this.key) {
+            console.warn("A key was already set, overriding existing.");
+        }
+        var params = {
+            n: parseBigInt(this.b64ToHex2(key.n), 16),
+            e: parseInt(this.b64ToHex2(key.e), 16),
+        };
+        if (key.d) {
+            params.d = parseBigInt(this.b64ToHex2(key.d), 16);
+            params.p = parseBigInt(this.b64ToHex2(key.p), 16);
+            params.q = parseBigInt(this.b64ToHex2(key.q), 16);
+            params.dmp1 = parseBigInt(this.b64ToHex2(key.dmp1), 16);
+            params.dmq1 = parseBigInt(this.b64ToHex2(key.dmq1), 16);
+            params.coeff = parseBigInt(this.b64ToHex2(key.coeff), 16);
+        }
+        this.key = new JSEncryptRSAKey(params);
+    };
+    JSEncrypt.prototype.b64ToHex2 = function (b64) {
+        return b64tohex(b64.replace(/\-/ig, "+").replace(/\_/ig, "/"));
+    };
     /**
      * Proxy method for setKey, for api compatibility
      * @see setKey
@@ -5356,7 +5377,7 @@ var JSEncrypt = /** @class */ (function () {
         // Return the private representation of this key.
         return this.getKey().getPublicBaseKeyB64();
     };
-    JSEncrypt.version = "3.0.0-rc.1";
+    JSEncrypt.version = "3.0.0-rc.1b";
     return JSEncrypt;
 }());
 

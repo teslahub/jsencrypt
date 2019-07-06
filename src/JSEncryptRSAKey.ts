@@ -10,12 +10,12 @@ import {KJUR} from "../lib/jsrsasign/asn1-1.0";
 /**
  * Create a new JSEncryptRSAKey that extends Tom Wu's RSA key object.
  * This object is just a decorator for parsing the key parameter
- * @param {string|Object} key - The key in string format, or an object containing
+ * @param {string|object} key - The key in string format, or an object containing
  * the parameters needed to build a RSAKey object.
  * @constructor
  */
 export class JSEncryptRSAKey extends RSAKey {
-    constructor(key?:string) {
+    constructor(key?:string|object) {
         super();
         // Call the super constructor.
         //  RSAKey.call(this);

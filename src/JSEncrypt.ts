@@ -1,5 +1,6 @@
 import {b64tohex, hex2b64} from "../lib/jsbn/base64";
 import {JSEncryptRSAKey} from "./JSEncryptRSAKey";
+import {BigInteger, parseBigInt} from "../lib/jsbn/jsbn";
 
 
 declare var JSENCRYPT_VERSION:string;
@@ -8,6 +9,40 @@ export interface IJSEncryptOptions {
     default_key_size?:string;
     default_public_exponent?:string;
     log?:boolean;
+}
+
+interface IRSAParameters2 {
+    n:BigInteger;
+    e:number;
+    d?:BigInteger;
+    p?:BigInteger;
+    q?:BigInteger;
+    dmp1?:BigInteger;
+    dmq1?:BigInteger;
+    coeff?:BigInteger;
+}
+
+/**
+ * RSA Parameters in Base64
+ *   modulus           INTEGER,  -- n
+ *   publicExponent    INTEGER,  -- e
+ *   privateExponent   INTEGER,  -- d
+ *   prime1            INTEGER,  -- p
+ *   prime2            INTEGER,  -- q
+ *   exponent1         INTEGER,  -- d mod (p1)
+ *   exponent2         INTEGER,  -- d mod (q-1)
+ *   coefficient       INTEGER,  -- (inverse of q) mod p
+ *
+ */
+export interface IRSAParameters {
+    n:string;
+    e:string;
+    d?:string;
+    p?:string;
+    q?:string;
+    dmp1?:string;
+    dmq1?:string;
+    coeff?:string;
 }
 
 /**
@@ -48,6 +83,29 @@ export default class JSEncrypt {
             console.warn("A key was already set, overriding existing.");
         }
         this.key = new JSEncryptRSAKey(key);
+    }
+
+    public setKeyParameters(key:IRSAParameters) {
+        if (this.log && this.key) {
+            console.warn("A key was already set, overriding existing.");
+        }
+        const params:IRSAParameters2 = {
+            n: parseBigInt(this.b64ToHex2(key.n), 16),
+            e: parseInt(this.b64ToHex2(key.e), 16),
+        };
+        if (key.d) {
+            params.d = parseBigInt(this.b64ToHex2(key.d), 16);
+            params.p = parseBigInt(this.b64ToHex2(key.p), 16);
+            params.q = parseBigInt(this.b64ToHex2(key.q), 16);
+            params.dmp1 = parseBigInt(this.b64ToHex2(key.dmp1), 16);
+            params.dmq1 = parseBigInt(this.b64ToHex2(key.dmq1), 16);
+            params.coeff = parseBigInt(this.b64ToHex2(key.coeff), 16);
+        }
+        this.key = new JSEncryptRSAKey(params);
+    }
+
+    private b64ToHex2(b64:string):string {
+        return b64tohex(b64.replace(/\-/ig, "+").replace(/\_/ig, "/"));
     }
 
     /**
